@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Page</title>
+</head>
+<body>
+    <div>
+        <h2>Login Page</h2>
+        <p>Status: {% if user.fitbituser %}✅{% else %}<a href="{% url 'fitbitlogin' %}" id="authfitbit">click to authenticate</a>{% endif %}.</p>
+</div>
+</body>
+</html>

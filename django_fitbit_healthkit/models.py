@@ -1,12 +1,10 @@
-# Create your models here.
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 
-
 class FitbitUser(models.Model):
-    """Adds a token to a django User."""
+    """Adds a token to a custom User model."""
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     fitbit_id = models.CharField(max_length=1024)
     access_token = models.CharField(max_length=1024)
     refresh_token = models.CharField(max_length=1024)

@@ -5,7 +5,7 @@ from base64 import b64encode
 from django.shortcuts import render
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, Http404
 
-from main import settings
+from django.conf import settings
 from .models import FitbitUser
 
 

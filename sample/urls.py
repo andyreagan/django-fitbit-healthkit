@@ -18,8 +18,8 @@ from django.contrib import admin
 from django.urls import include, path
 import django_fitbit_healthkit.urls as fitbit
 from .views import index
+
 urlpatterns = [
-    
     path("admin/", admin.site.urls),
     # include all of the fitbit urls as an app
     path("fitbit/", include(fitbit)),

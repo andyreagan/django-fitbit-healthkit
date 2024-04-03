@@ -1,14 +1,32 @@
 # a simple view that just loads index.html
 # and puts the user in the context
+from datetime import date
+
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 
+from django_fitbit_healthkit.methods import (
+    activity_intraday_by_date,
+    daily_activity_summary,
+    sleep_log_by_date,
+)
+
 
 def index(request: HttpRequest) -> HttpResponse:
-    return render(request, "sample/index.html", {"user": request.user})
+    # if the user is logged in, get the daily fitbit data
+    context = {"user": request.user}
+    if request.user.is_authenticated and hasattr(request.user, "fitbituser"):
+        context["daily_activity"] = daily_activity_summary(
+            request.user.fitbituser, date.today()
+        )
+        context["sleep_log"] = sleep_log_by_date(request.user.fitbituser, date.today())
+        context["activity_intraday"] = activity_intraday_by_date(
+            request.user.fitbituser, "steps", date.today(), "15min"
+        )
+    return render(request, "sample/index.html", context)
 
 
 def login_view(request):

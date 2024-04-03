@@ -5,8 +5,7 @@ from datetime import datetime
 import requests
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
-from django.http import (Http404, HttpRequest, HttpResponse,
-                         HttpResponseRedirect)
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 

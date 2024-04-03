@@ -99,6 +99,7 @@ class FitbitUser(models.Model):
         tuple element.
         """
         if self.is_expired:
+            print("Token expired, will attempt an update")
             try:
                 self.update_tokens()
             except Exception as e:
@@ -109,6 +110,7 @@ class FitbitUser(models.Model):
         headers = {"authorization": f"Bearer {self.access_token}", **headers}
 
         while fetch_attempts < max_fetch_attempts:
+            print(f"Fetch attempt #{fetch_attempts}")
             fetch_attempts += 1
             if request_type == "GET":
                 requester = requests.get
@@ -119,6 +121,7 @@ class FitbitUser(models.Model):
                 response = requester(*args, headers=headers, **kwargs)
             except requests.exceptions.RequestException as e:
                 return (None, e)
+            print(response.status_code, response.text)
 
             if response.status_code == 401:
                 try:

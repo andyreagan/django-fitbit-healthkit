@@ -11,6 +11,15 @@
         {% else %}
         <h2>Welcome back, {{ user.username }}.</h2>
         <p>Status: {% if user.fitbituser %}✅{% else %}<a href="{% url 'fitbitlogin' %}" id="authfitbit">click to authenticate</a>{% endif %}.</p>
+        <!-- if we have daily_activity in the context, display the raw json -->
+        {% if daily_activity %}
+        <h3>Today's activity:</h3>
+        <pre>{{ daily_activity }}</pre>
+        <h3>Today's steps:</h3>
+        <pre>{{ activity_intraday }}</pre>
+        <h3>Today's sleep:</h3>
+        <pre>{{ sleep_log }}</pre>
+        {% endif %}
         <!-- log out link -->
         <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}

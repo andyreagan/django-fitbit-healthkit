@@ -49,5 +49,3 @@ def extract_active_from_total(total: float, METs_sum: int, minutes: int) -> floa
     if minutes_10 > METs_sum:
         return 0.0
     return total * ((METs_sum - minutes_10) / METs_sum)
-
-

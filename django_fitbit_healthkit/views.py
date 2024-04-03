@@ -1,13 +1,14 @@
-from datetime import datetime
 import json
 import urllib
+from datetime import datetime
 
-from django.urls import reverse
 import requests
 from django.conf import settings
-from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.contrib.sites.shortcuts import get_current_site
+from django.http import (Http404, HttpRequest, HttpResponse,
+                         HttpResponseRedirect)
 from django.shortcuts import render
+from django.urls import reverse
 
 from .models import FitbitNotification, FitbitUser
 from .util import encoded_secret, test_fitbit_signature
@@ -68,14 +69,16 @@ def success(request: HttpRequest) -> HttpResponse:
         print(fitbit_user)
 
     # update the token too
-    (fb_user, created) = FitbitUser.objects.get_or_create(user=request.user, defaults={
-        "access_token": fitbit_user.get("access_token"),
-        "refresh_token": fitbit_user.get("refresh_token"),
-        "expires_in": fitbit_user.get("expires_in"),
-        "fitbit_id": fitbit_user.get("user_id"),
-        "scopes": fitbit_user.get("scope"),
-    })
-
+    (fb_user, created) = FitbitUser.objects.get_or_create(
+        user=request.user,
+        defaults={
+            "access_token": fitbit_user.get("access_token"),
+            "refresh_token": fitbit_user.get("refresh_token"),
+            "expires_in": fitbit_user.get("expires_in"),
+            "fitbit_id": fitbit_user.get("user_id"),
+            "scopes": fitbit_user.get("scope"),
+        },
+    )
 
     # get_athlete_activities(ath, max_requests=1)
     # t = threading.Thread(target=get_user_data, args=[s, 100])

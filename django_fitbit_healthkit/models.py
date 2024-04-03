@@ -152,14 +152,14 @@ class FitbitNotification(models.Model):
             "ownerId": "USER_1",
             "ownerType": "user",
             "subscriptionId": "1234"
-        }, 
+        },
         {
             "collectionType": "foods",
             "date": "2010-03-02",
             "ownerId": "USER_1",
             "ownerType": "user",
             "subscriptionId": "1234"
-        }, 
+        },
         {
             "collectionType": "activities",
             "date": "2010-03-01",
@@ -169,6 +169,7 @@ class FitbitNotification(models.Model):
         }
     ]
     """
+
     user = models.ForeignKey(FitbitUser, on_delete=models.CASCADE)
     date = models.DateField()
     notification = models.TextField()

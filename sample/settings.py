@@ -42,10 +42,14 @@ INSTALLED_APPS = [
 
 FITBIT_CLIENT_ID = os.environ.get("FITBIT_CLIENT_ID", "")
 FITBIT_CLIENT_SECRET = os.environ.get("FITBIT_CLIENT_SECRET", "")
-FITBIT_SUBSCRIPTION_VERIFICATION_CODE = os.environ.get("FITBIT_SUBSCRIPTION_VERIFICATION_CODE", "")
+FITBIT_SUBSCRIPTION_VERIFICATION_CODE = os.environ.get(
+    "FITBIT_SUBSCRIPTION_VERIFICATION_CODE", ""
+)
 FITBIT_AUTHORIZATION_URI = "https://www.fitbit.com/oauth2/authorize"
 FITBIT_ACCESS_REFRESH_TOKEN_REQUEST_URI = "https://api.fitbit.com/oauth2/token"
-FITBIT_SCOPES = "activity heartrate location nutrition profile settings sleep social weight"
+FITBIT_SCOPES = (
+    "activity heartrate location nutrition profile settings sleep social weight"
+)
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -124,6 +128,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

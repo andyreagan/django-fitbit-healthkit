@@ -6,19 +6,22 @@ from django.urls import reverse
 import requests
 from django.conf import settings
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
+from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import render
 
 from .models import FitbitNotification, FitbitUser
 from .util import encoded_secret, test_fitbit_signature
 
 
-def login(_: HttpRequest) -> HttpResponseRedirect:
+def login(request: HttpRequest) -> HttpResponseRedirect:
     """
     Redirect to authenticate to with Fitbit.
     """
+    current_site = get_current_site(request)
+    base_url = "http://" + current_site.domain
     data = {
         "client_id": settings.FITBIT_CLIENT_ID,
-        "redirect_uri": reverse("fitbitsuccess"),
+        "redirect_uri": base_url + reverse("fitbitsuccess"),
         "response_type": "code",
         "scope": settings.FITBIT_SCOPES,
         "expires_in": 604800,
@@ -32,6 +35,9 @@ def success(request: HttpRequest) -> HttpResponse:
     if "code" not in request.GET:
         return Http404(f"No access code returned: {request.GET}.")
 
+    current_site = get_current_site(request)
+    base_url = "http://" + current_site.domain
+
     data = {
         # maybe an error, but the docs here say client_id:
         # https://dev.fitbit.com/build/reference/web-api/oauth2/
@@ -41,7 +47,7 @@ def success(request: HttpRequest) -> HttpResponse:
         "client_id": settings.FITBIT_CLIENT_ID,
         "code": request.GET["code"],
         "grant_type": "authorization_code",
-        "redirect_uri": reverse("fitbitsuccess"),
+        "redirect_uri": base_url + reverse("fitbitsuccess"),
     }
     headers = {
         "Authorization": f"Basic {encoded_secret(settings.FITBIT_CLIENT_ID, settings.FITBIT_CLIENT_SECRET)}"
@@ -62,13 +68,14 @@ def success(request: HttpRequest) -> HttpResponse:
         print(fitbit_user)
 
     # update the token too
-    (fb_user, created) = FitbitUser.objects.get_or_create(user=request.user)
-    fb_user.access_token = fitbit_user.get("access_token")
-    fb_user.refresh_token = fitbit_user.get("refresh_token")
-    fb_user.expires_in = fitbit_user.get("expires_in")
-    fb_user.fitbit_id = fitbit_user.get("user_id")
-    fb_user.scopes = fitbit_user.get("scope")
-    fb_user.save()
+    (fb_user, created) = FitbitUser.objects.get_or_create(user=request.user, defaults={
+        "access_token": fitbit_user.get("access_token"),
+        "refresh_token": fitbit_user.get("refresh_token"),
+        "expires_in": fitbit_user.get("expires_in"),
+        "fitbit_id": fitbit_user.get("user_id"),
+        "scopes": fitbit_user.get("scope"),
+    })
+
 
     # get_athlete_activities(ath, max_requests=1)
     # t = threading.Thread(target=get_user_data, args=[s, 100])

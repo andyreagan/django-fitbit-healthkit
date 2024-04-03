@@ -19,7 +19,7 @@ from django.urls import include, path
 
 import django_fitbit_healthkit.urls as fitbit
 
-from .views import index
+from .views import index, login_view, register_view, logout_view
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -27,4 +27,7 @@ urlpatterns = [
     path("fitbit/", include(fitbit)),
     # include the simple index view
     path("", index, name="home"),
+    path('login/', login_view, name='login'),
+    path('register/', register_view, name='register'),
+    path('logout/', logout_view, name='logout'),
 ]

@@ -1,27 +1,28 @@
+from datetime import datetime
+import json
 import urllib
+
+from django.urls import reverse
 import requests
-from base64 import b64encode
-
-from django.shortcuts import render
-from django.http import HttpResponse, HttpRequest, HttpResponseRedirect, Http404
-
 from django.conf import settings
-from .models import FitbitUser
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+
+from .models import FitbitNotification, FitbitUser
+from .util import encoded_secret, test_fitbit_signature
 
 
-def login(request: HttpRequest) -> HttpResponseRedirect:
-    '''
+def login(_: HttpRequest) -> HttpResponseRedirect:
+    """
     Redirect to authenticate to with Fitbit.
-    '''
+    """
     data = {
         "client_id": settings.FITBIT_CLIENT_ID,
-        "redirect_uri": settings.FITBIT_CALLBACK_URL,
+        "redirect_uri": reverse("fitbitsuccess"),
         "response_type": "code",
-        "scope": "activity heartrate location nutrition profile settings sleep social weight",
-        "expires_in": 604800
+        "scope": settings.FITBIT_SCOPES,
+        "expires_in": 604800,
     }
-    if settings.DEBUG:
-        data["redirect_uri"] = "http://localhost:8000/fitbit/success"
     return HttpResponseRedirect(
         settings.FITBIT_AUTHORIZATION_URI + "?" + urllib.parse.urlencode(data)
     )
@@ -40,21 +41,13 @@ def success(request: HttpRequest) -> HttpResponse:
         "client_id": settings.FITBIT_CLIENT_ID,
         "code": request.GET["code"],
         "grant_type": "authorization_code",
-        "redirect_uri": settings.FITBIT_CALLBACK_URL,
+        "redirect_uri": reverse("fitbitsuccess"),
     }
-    if settings.DEBUG:
-        data["redirect_uri"] = "http://localhost:8000/fitbit/success"
-    encoded = b64encode(
-        "{client_id}:{client_secret}".format(
-            client_id=settings.FITBIT_CLIENT_ID, client_secret=settings.FITBIT_CLIENT_SECRET
-        ).encode("latin1")
-    )
-    content = "Basic {encoded}".format(encoded=encoded.decode("latin1"))
-    headers = {'Authorization': content}
+    headers = {
+        "Authorization": f"Basic {encoded_secret(settings.FITBIT_CLIENT_ID, settings.FITBIT_CLIENT_SECRET)}"
+    }
     r = requests.post(
-        settings.FITBIT_ACCESS_REFRESH_TOKEN_REQUEST_URI,
-        data=data,
-        headers=headers
+        settings.FITBIT_ACCESS_REFRESH_TOKEN_REQUEST_URI, data=data, headers=headers
     )
     # rather than raise an application error, pass that error back to the user:
     # r.raise_for_status()
@@ -74,6 +67,7 @@ def success(request: HttpRequest) -> HttpResponse:
     fb_user.refresh_token = fitbit_user.get("refresh_token")
     fb_user.expires_in = fitbit_user.get("expires_in")
     fb_user.fitbit_id = fitbit_user.get("user_id")
+    fb_user.scopes = fitbit_user.get("scope")
     fb_user.save()
 
     # get_athlete_activities(ath, max_requests=1)
@@ -81,4 +75,41 @@ def success(request: HttpRequest) -> HttpResponse:
     # t.setDaemon(True)
     # t.start()
 
+    # TODO: let this redirect to the user's profile page or
+    # otherwise be customerized by the app
     return render(request, "fitbit/success.html", fitbit_user)
+
+
+def fitbit_subscription(request: HttpRequest) -> HttpResponse:
+    """
+    Fitbit sends a subscription notification to this endpoint.
+
+    As of yet, we still need to:
+    - Create subscriptions for users we want them on
+    - Handle the notifications (go get the data)
+    """
+    if request.method == "GET":
+        verify = request.GET.get("verify")
+        if verify == settings.FITBIT_SUBSCRIPTION_VERIFICATION_CODE:
+            return HttpResponse(status=204)
+        return HttpResponse(status=404)
+
+    # we have a post request
+    # check signature
+    fitbit_signature = request.headers.get("x-fitbit-signature")
+    if not test_fitbit_signature(fitbit_signature, request.body):
+        return HttpResponse(status=404)
+
+    # save the notifications
+    # we get up to 100 at a time so use a bulk load
+    data = json.loads(request.body)
+    objs = [
+        FitbitNotification(
+            user=FitbitUser.objects.get(fitbit_id=d["ownerId"]),
+            notification=d["collectionType"],
+            date=datetime.strptime(d["date"], "%Y-%m-%d").date(),
+        )
+        for d in data
+    ]
+    FitbitNotification.objects.bulk_create(objs)
+    return HttpResponse(status=204)

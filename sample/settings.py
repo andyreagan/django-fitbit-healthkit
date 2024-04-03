@@ -10,12 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -38,13 +37,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django_fitbit_healthkit"
+    "django_fitbit_healthkit",
 ]
 
 FITBIT_CLIENT_ID = os.environ.get("FITBIT_CLIENT_ID", "")
-FITBIT_CALLBACK_URL = os.environ.get("FITBIT_CALLBACK_URL", "")
+FITBIT_CLIENT_SECRET = os.environ.get("FITBIT_CLIENT_SECRET", "")
+FITBIT_SUBSCRIPTION_VERIFICATION_CODE = os.environ.get("FITBIT_SUBSCRIPTION_VERIFICATION_CODE", "")
 FITBIT_AUTHORIZATION_URI = "https://www.fitbit.com/oauth2/authorize"
 FITBIT_ACCESS_REFRESH_TOKEN_REQUEST_URI = "https://api.fitbit.com/oauth2/token"
+FITBIT_SCOPES = "activity heartrate location nutrition profile settings sleep social weight"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -61,7 +62,7 @@ ROOT_URLCONF = "sample.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, 'templates')],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+
 import django_fitbit_healthkit.urls as fitbit
+
 from .views import index
 
 urlpatterns = [
@@ -24,5 +26,5 @@ urlpatterns = [
     # include all of the fitbit urls as an app
     path("fitbit/", include(fitbit)),
     # include the simple index view
-    path("", index),
+    path("", index, name="home"),
 ]

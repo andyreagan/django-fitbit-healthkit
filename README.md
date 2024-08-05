@@ -66,3 +66,21 @@ python3 manage.py runserver
 This will allow you to register an account,
 sign in with fitbit,
 and view some of your data.
+
+Release workflow
+----------------
+
+Develop on a branch.
+When it's ready,
+merge to main.
+
+If this is not a release (no bumped version in `setup.cfg`),
+then TestPyPI _may_ fail
+with a duplicate sdist upload (it has before).
+
+If it's a new version, then the `setup.cfg`
+should have been bumped **on the branch**.
+When it's merged,
+we expect TestPyPI to succeed.
+Then the tag can be pushed to GH,
+which will trigger real PyPI release.

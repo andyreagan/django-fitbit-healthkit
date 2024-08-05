@@ -5,7 +5,7 @@ import hmac
 from django.conf import settings
 
 
-def test_fitbit_signature(sig: str, data: str) -> bool:
+def verify_fitbit_signature(sig: str, data: str) -> bool:
     return sig == make_digest(settings.FITBIT_CLIENT_SECRET + "&", data)
 
 

@@ -5,12 +5,13 @@ from datetime import datetime
 import requests
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
-from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import (Http404, HttpRequest, HttpResponse,
+                         HttpResponseRedirect)
 from django.shortcuts import render
 from django.urls import reverse
 
 from .models import FitbitNotification, FitbitUser
-from .util import encoded_secret, test_fitbit_signature
+from .util import encoded_secret, verify_fitbit_signature
 
 
 def login(request: HttpRequest) -> HttpResponseRedirect:
@@ -106,7 +107,7 @@ def fitbit_subscription(request: HttpRequest) -> HttpResponse:
     # we have a post request
     # check signature
     fitbit_signature = request.headers.get("x-fitbit-signature")
-    if not test_fitbit_signature(fitbit_signature, request.body):
+    if not verify_fitbit_signature(fitbit_signature, request.body):
         return HttpResponse(status=404)
 
     # save the notifications

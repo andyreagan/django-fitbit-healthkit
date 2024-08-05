@@ -8,11 +8,9 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 
-from django_fitbit_healthkit.methods import (
-    activity_intraday_by_date,
-    daily_activity_summary,
-    sleep_log_by_date,
-)
+from django_fitbit_healthkit.methods import (activity_intraday_by_date,
+                                             daily_activity_summary,
+                                             sleep_log_by_date)
 
 
 def index(request: HttpRequest) -> HttpResponse:

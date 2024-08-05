@@ -69,7 +69,16 @@ def success(request: HttpRequest) -> HttpResponse:
         print(fitbit_user)
 
     # update the token too
-    fb_user, created = FitbitUser.objects.get_or_create(user=request.user)
+    fb_user, created = FitbitUser.objects.get_or_create(
+        user=request.user, 
+        defaults={
+            'access_token': fitbit_user.get("access_token"),
+            'refresh_token': fitbit_user.get("refresh_token"),
+            'expires_in': fitbit_user.get("expires_in"),
+            'fitbit_id': fitbit_user.get("user_id"),
+            'scopes': fitbit_user.get("scope"),
+        }
+    )
 
     if not created:
         # Update the token attributes

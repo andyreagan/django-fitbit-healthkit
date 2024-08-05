@@ -4,19 +4,11 @@ from django.urls import reverse
 # path("login", views.login, name="fitbitlogin"),
 # path("success", views.success, name="fitbitsuccess"),
 # path("webhook", views.fitbit_subscription, name="fitbitsubscription"),
-
-# class MyViewTest(TestCase):
-#     def test_my_view(self):
-#         # Make a request to the view
-#         response = self.client.get(reverse("fitbitlogin"))
-        
-#         # Now use the response object with assertRedirects
-#         
  
 from urllib.parse import urlparse
 
 class MyViewTest(TestCase):
-    def test_my_view(self):
+    def test_login(self):
         # Make a request to the view
         response = self.client.get(reverse("fitbitlogin"))
 
@@ -31,3 +23,9 @@ class MyViewTest(TestCase):
         
         # Compare the base URL without query parameters
         self.assertEqual(base_redirect_url, 'https://www.fitbit.com/oauth2/authorize')
+
+    def test_success(self):
+        pass
+
+    def test_webhook(self):
+        pass

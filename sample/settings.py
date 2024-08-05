@@ -66,7 +66,7 @@ ROOT_URLCONF = "sample.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "DIRS": [os.path.join(BASE_DIR, "sample", "templates"),],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -134,3 +134,37 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# this does debug logging for debug django
+# LEVELS = ['INFO', 'DEBUG']
+# and this bumps up to info for debug django
+LEVELS = ['WARNING', 'INFO']
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': LEVELS[DEBUG],
+            'class': 'logging.StreamHandler',
+            'formatter': 'detailed',
+        },
+    },
+    'formatters': {
+        'detailed': {
+            'format': '%(asctime)s %(levelname)s %(module)s %(message)s'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': LEVELS[DEBUG],
+            'propagate': True,
+        },
+        # If you want to log debug messages from your own apps as well
+        'django_fitbit_healthkit': {
+            'handlers': ['console'],
+            'level': LEVELS[DEBUG],
+            'propagate': True,
+        },
+    },
+}

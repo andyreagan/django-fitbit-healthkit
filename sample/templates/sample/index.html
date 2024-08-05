@@ -10,7 +10,16 @@
         <h2><a href="{% url 'login' %}">Login</a> to view this page</h2>
         {% else %}
         <h2>Welcome back, {{ user.username }}.</h2>
-        <p>Status: {% if user.fitbituser %}✅{% else %}<a href="{% url 'fitbitlogin' %}" id="authfitbit">click to authenticate</a>{% endif %}.</p>
+        <p>Status: {% if user.fitbituser %}
+            {% if connection %}
+            ✅
+            {% else %}
+            ❌ <a href="{% url 'fitbitlogin' %}" id="authfitbit">click to re-authenticate</a>
+            {% endif %}
+            {% else %}
+            <a href="{% url 'fitbitlogin' %}" id="authfitbit">click to authenticate</a>
+        {% endif %}
+        </p>
         <!-- if we have daily_activity in the context, display the raw json -->
         {% if daily_activity %}
         <h3>Today's activity:</h3>

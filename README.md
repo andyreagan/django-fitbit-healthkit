@@ -45,13 +45,21 @@ FITBIT_CLIENT_SECRET=xxx
 which will be picked up by `sample/settings.py`.
 In your fitbit app settings, add `http://localhost:8000/fitbit/success` to the allowed callback URLs.
 
-You can run the app quite simply:
+Set up dev environment.
+There is nothing complicated here,
+so vanilla venv on any platform is probably sufficient
+(no nix/devbox, dev container type setup is necessary).
 
 ```
 python3 -m venv venv
 source venv/bin/activate
 pip3 install Django
-python3 manage.py migrate
+```
+
+Apply DB migrations with `python3 manage.py migrate`.
+You can run the app quite simply:
+
+```
 python3 manage.py runserver
 ```
 

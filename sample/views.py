@@ -8,22 +8,46 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 
-from django_fitbit_healthkit.methods import (activity_intraday_by_date,
+from django_fitbit_healthkit.methods import (check_fitbit_access,
+                                             activity_intraday_by_date,
                                              daily_activity_summary,
                                              sleep_log_by_date)
+import logging
 
+logger = logging.getLogger(__name__)
 
 def index(request: HttpRequest) -> HttpResponse:
     # if the user is logged in, get the daily fitbit data
     context = {"user": request.user}
     if request.user.is_authenticated and hasattr(request.user, "fitbituser"):
-        context["daily_activity"] = daily_activity_summary(
-            request.user.fitbituser, date.today()
-        )
-        context["sleep_log"] = sleep_log_by_date(request.user.fitbituser, date.today())
-        context["activity_intraday"] = activity_intraday_by_date(
-            request.user.fitbituser, "steps", date.today(), "15min"
-        )
+        # first let's hit a fitbit api to check if our token is valid
+        # to do this, we shouldn't need any specific API scopes
+        access = check_fitbit_access(request.user.fitbituser)
+        context["connection"] = access
+        if access:
+            if "activity" in request.user.fitbituser.scopes:
+                resp, _ = daily_activity_summary(
+                    request.user.fitbituser, date.today()
+                )
+                context["daily_activity"] = resp.json()
+
+                # intraday is "special"
+                # either a personal API token or
+                # the app must have been granted this special access from fitbit
+                intraday, err = activity_intraday_by_date(
+                    request.user.fitbituser, "steps", date.today(), "15min"
+                )
+                logger.info((intraday, err))
+                # if we get a 404 on intraday, it's because we don't have access to that endpoint
+                if intraday is None or intraday.status_code == 404:
+                    context["activity_intraday"] = "Intraday access not available"
+                else:
+                    context["activity_intraday"] = intraday.json()
+            
+            if "sleep" in request.user.fitbituser.scopes:
+                context["sleep_log"] = sleep_log_by_date(request.user.fitbituser, date.today())[0].json()            
+
+
     return render(request, "sample/index.html", context)
 
 

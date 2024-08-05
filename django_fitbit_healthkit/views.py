@@ -69,25 +69,24 @@ def success(request: HttpRequest) -> HttpResponse:
         print(fitbit_user)
 
     # update the token too
-    (fb_user, created) = FitbitUser.objects.get_or_create(
-        user=request.user,
-        defaults={
-            "access_token": fitbit_user.get("access_token"),
-            "refresh_token": fitbit_user.get("refresh_token"),
-            "expires_in": fitbit_user.get("expires_in"),
-            "fitbit_id": fitbit_user.get("user_id"),
-            "scopes": fitbit_user.get("scope"),
-        },
-    )
+    fb_user, created = FitbitUser.objects.get_or_create(user=request.user)
+
+    if not created:
+        # Update the token attributes
+        fb_user.access_token = fitbit_user.get("access_token")
+        fb_user.refresh_token = fitbit_user.get("refresh_token")
+        fb_user.expires_in = fitbit_user.get("expires_in")
+        fb_user.fitbit_id = fitbit_user.get("user_id")
+        fb_user.scopes = fitbit_user.get("scope")
+        fb_user.save()
 
     # get_athlete_activities(ath, max_requests=1)
     # t = threading.Thread(target=get_user_data, args=[s, 100])
     # t.setDaemon(True)
     # t.start()
 
-    # TODO: let this redirect to the user's profile page or
-    # otherwise be customerized by the app
-    return render(request, "fitbit/success.html", fitbit_user)
+    redir_uri = settings.FITBIT_SUCCESS_TEMPLATE if hasattr(settings, 'FITBIT_SUCCESS_TEMPLATE') else 'fitbit/success.html'
+    return render(request, redir_uri, fitbit_user)
 
 
 def fitbit_subscription(request: HttpRequest) -> HttpResponse:

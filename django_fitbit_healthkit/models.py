@@ -7,6 +7,9 @@ from django.conf import settings
 from django.db import models
 
 from .util import encoded_secret
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class FitbitUser(models.Model):
@@ -29,7 +32,9 @@ class FitbitUser(models.Model):
         )
 
     def get_new_tokens(self) -> Tuple[Optional[Dict], Optional[Exception]]:
+        logger.info("Getting new tokens")
         if self.refresh_token is None or self.refresh_token == "":
+            logger.info("No refresh token, can't get new tokens")
             return (None, Exception("No refresh token available"))
 
         params = {
@@ -40,7 +45,6 @@ class FitbitUser(models.Model):
             "Content-Type": "application/x-www-form-urlencoded",
             "Authorization": f"Basic {encoded_secret(settings.FITBIT_CLIENT_ID, settings.FITBIT_CLIENT_SECRET)}",
         }
-        headers = {}
         try:
             response = requests.post(
                 settings.FITBIT_ACCESS_REFRESH_TOKEN_REQUEST_URI,
@@ -48,6 +52,7 @@ class FitbitUser(models.Model):
                 params=params,
             )
             if response.status_code == 401:
+                logger.info("401 from fitbit, unauthorized")
                 # unauthorized, clear the tokens
                 return (None, Exception("Unauthorized"))
             elif response.status_code == 200:
@@ -55,14 +60,17 @@ class FitbitUser(models.Model):
                 return (response.json(), None)
             else:
                 # should propogate the error up to the caller
+                logger.info(f"Error in fitbit oauth handshake: {response.text}")
                 return (
                     None,
                     Exception(f"Error in fitbit oauth handshake: {response.text}"),
                 )
         # catch these separately
         except requests.exceptions.RequestException as e:
+            logger.info(f"Error in fitbit token request: {e}")
             return (None, e)
         except Exception as e:
+            logger.info(f"Error in fitbit token request: {e}")
             return (None, e)
 
     def update_tokens(self) -> None:
@@ -70,9 +78,11 @@ class FitbitUser(models.Model):
         Updates the tokens.
         Raises a generic exception if there are any errors.
         """
+        logger.info("Updating tokens")
         required_keys = ["access_token", "refresh_token", "expires_in"]
-        reauth_data, err = self.get_new_tokens(new_date=datetime.now(timezone.utc))
+        reauth_data, err = self.get_new_tokens()
         if err is not None:
+            logger.info((reauth_data, err))
             raise Exception(f"Error in fitbit oauth handshake: {err}")
         elif reauth_data is None or any(x not in reauth_data for x in required_keys):
             raise Exception(f"Missing keys in returned response: {reauth_data}")
@@ -82,6 +92,7 @@ class FitbitUser(models.Model):
         self.expires_in = reauth_data["expires_in"]
         self.scopes = reauth_data.get("scope", "")
         self.save()
+        logger.info("Successfully updated tokens")
 
     def make_request(
         self,
@@ -99,7 +110,7 @@ class FitbitUser(models.Model):
         tuple element.
         """
         if self.is_expired:
-            print("Token expired, will attempt an update")
+            logger.info("Token expired, will attempt an update")
             try:
                 self.update_tokens()
             except Exception as e:
@@ -110,7 +121,7 @@ class FitbitUser(models.Model):
         headers = {"authorization": f"Bearer {self.access_token}", **headers}
 
         while fetch_attempts < max_fetch_attempts:
-            print(f"Fetch attempt #{fetch_attempts}")
+            logger.info(f"Fetch attempt #{fetch_attempts}")
             fetch_attempts += 1
             if request_type == "GET":
                 requester = requests.get
@@ -121,7 +132,7 @@ class FitbitUser(models.Model):
                 response = requester(*args, headers=headers, **kwargs)
             except requests.exceptions.RequestException as e:
                 return (None, e)
-            print(response.status_code, response.text)
+            logger.info((response.status_code, response.text))
 
             if response.status_code == 401:
                 try:

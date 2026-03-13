@@ -1,3 +1,63 @@
 [build-system]
-requires = ['setuptools>=40.8.0']
-build-backend = 'setuptools.build_meta'
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-fitbit-healthkit"
+version = "0.6"
+description = "A Django app to access Fitbit Web APIs."
+readme = "README.md"
+license = "BSD-3-Clause"
+authors = [
+    { name = "Andy Reagan", email = "andy@andyreagan.com" },
+]
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 5.0",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "Django>=4.0",
+    "requests>=2.31.0",
+]
+
+[project.urls]
+Homepage = "https://django-fitbit-healthkit.andyreagan.github.io"
+Repository = "https://github.com/andyreagan/django-fitbit-healthkit"
+Issues = "https://github.com/andyreagan/django-fitbit-healthkit/issues"
+
+[dependency-groups]
+dev = [
+    "django>=4.0",
+    "pytest>=8.0",
+    "pytest-django>=4.8",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["django_fitbit_healthkit"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "django_fitbit_healthkit/",
+    "LICENSE",
+    "README.md",
+    "docs/",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "sample.settings"
+python_files = ["tests/test_*.py"]

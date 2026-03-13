@@ -35,7 +35,7 @@ path("fitbit/", include("django_fitbit_healthkit.urls")),
 Running the sample app
 ----------------------
 
-Make sure to set environment variables for 
+Make sure to set environment variables for
 
 ```sh
 FITBIT_CLIENT_ID=xxx

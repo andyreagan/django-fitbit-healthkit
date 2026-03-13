@@ -5,8 +5,7 @@ from datetime import datetime
 import requests
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
-from django.http import (Http404, HttpRequest, HttpResponse,
-                         HttpResponseRedirect)
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -70,14 +69,14 @@ def success(request: HttpRequest) -> HttpResponse:
 
     # update the token too
     fb_user, created = FitbitUser.objects.get_or_create(
-        user=request.user, 
+        user=request.user,
         defaults={
-            'access_token': fitbit_user.get("access_token"),
-            'refresh_token': fitbit_user.get("refresh_token"),
-            'expires_in': fitbit_user.get("expires_in"),
-            'fitbit_id': fitbit_user.get("user_id"),
-            'scopes': fitbit_user.get("scope"),
-        }
+            "access_token": fitbit_user.get("access_token"),
+            "refresh_token": fitbit_user.get("refresh_token"),
+            "expires_in": fitbit_user.get("expires_in"),
+            "fitbit_id": fitbit_user.get("user_id"),
+            "scopes": fitbit_user.get("scope"),
+        },
     )
 
     if not created:
@@ -94,7 +93,11 @@ def success(request: HttpRequest) -> HttpResponse:
     # t.setDaemon(True)
     # t.start()
 
-    redir_uri = settings.FITBIT_SUCCESS_TEMPLATE if hasattr(settings, 'FITBIT_SUCCESS_TEMPLATE') else 'fitbit/success.html'
+    redir_uri = (
+        settings.FITBIT_SUCCESS_TEMPLATE
+        if hasattr(settings, "FITBIT_SUCCESS_TEMPLATE")
+        else "fitbit/success.html"
+    )
     return render(request, redir_uri, fitbit_user)
 
 

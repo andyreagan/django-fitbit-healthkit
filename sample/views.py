@@ -8,13 +8,16 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 
-from django_fitbit_healthkit.methods import (check_fitbit_access,
-                                             activity_intraday_by_date,
-                                             daily_activity_summary,
-                                             sleep_log_by_date)
+from django_fitbit_healthkit.methods import (
+    check_fitbit_access,
+    activity_intraday_by_date,
+    daily_activity_summary,
+    sleep_log_by_date,
+)
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 def index(request: HttpRequest) -> HttpResponse:
     # if the user is logged in, get the daily fitbit data
@@ -26,9 +29,7 @@ def index(request: HttpRequest) -> HttpResponse:
         context["connection"] = access
         if access:
             if "activity" in request.user.fitbituser.scopes:
-                resp, _ = daily_activity_summary(
-                    request.user.fitbituser, date.today()
-                )
+                resp, _ = daily_activity_summary(request.user.fitbituser, date.today())
                 context["daily_activity"] = resp.json()
 
                 # intraday is "special"
@@ -43,10 +44,11 @@ def index(request: HttpRequest) -> HttpResponse:
                     context["activity_intraday"] = "Intraday access not available"
                 else:
                     context["activity_intraday"] = intraday.json()
-            
-            if "sleep" in request.user.fitbituser.scopes:
-                context["sleep_log"] = sleep_log_by_date(request.user.fitbituser, date.today())[0].json()            
 
+            if "sleep" in request.user.fitbituser.scopes:
+                context["sleep_log"] = sleep_log_by_date(
+                    request.user.fitbituser, date.today()
+                )[0].json()
 
     return render(request, "sample/index.html", context)
 

@@ -12,7 +12,7 @@ import django
 from django.conf import settings
 
 # Define the environment variable for Django's settings module
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sample.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sample.settings")
 
 # Configure Django for the script
 django.setup()
@@ -23,20 +23,22 @@ from playwright._impl._errors import TimeoutError
 
 from django.contrib.auth import get_user_model
 
-USERNAME="testuser"
-PASSWORD="Testpassword123"
+USERNAME = "testuser"
+PASSWORD = "Testpassword123"
 
 # name of the app that is shown in the client's list of connected apps
-FITBIT_CLIENT_NAME=os.environ.get("FITBIT_CLIENT_NAME")
+FITBIT_CLIENT_NAME = os.environ.get("FITBIT_CLIENT_NAME")
 # username/password of the fitbit account we want to log in with
-FITBIT_USERNAME=os.environ.get("FITBIT_USERNAME")
-FITBIT_PASSWORD=os.environ.get("FITBIT_PASSWORD")
+FITBIT_USERNAME = os.environ.get("FITBIT_USERNAME")
+FITBIT_PASSWORD = os.environ.get("FITBIT_PASSWORD")
 
-def wait_with_dots(seconds, n_dots = 80) -> None:
+
+def wait_with_dots(seconds, n_dots=80) -> None:
     for _ in range(n_dots):
-        print('.', end='', flush=True)
+        print(".", end="", flush=True)
         time.sleep(seconds / n_dots)
     print()  # Move to the next line after the wait is over
+
 
 def delete_existing_user() -> None:
     User = get_user_model()
@@ -63,7 +65,7 @@ def remove_fitbit_connection(connection_expected=False):
         browser = p.chromium.launch(headless=False, slow_mo=500)
         page = browser.new_page()
         # page.goto("https://www.fitbit.com/login")
-        
+
         page.goto("https://www.fitbit.com/settings/applications")
         page.fill("input[type='email']", FITBIT_USERNAME)
         page.fill("input[type='password']", FITBIT_PASSWORD)
@@ -98,7 +100,9 @@ def remove_fitbit_connection(connection_expected=False):
 
             # we also have attribute data-open="[FITBIT_CLIENT_ID]-revoke-access"
             # so we can use that to find the button
-            button_selector = f"button[data-open='{settings.FITBIT_CLIENT_ID}-revoke-access']"
+            button_selector = (
+                f"button[data-open='{settings.FITBIT_CLIENT_ID}-revoke-access']"
+            )
             page.click(button_selector)
 
             print("Revoked access")
@@ -188,6 +192,7 @@ def reconnect_fitbit():
         assert page.inner_text("p") == "Status: ✅"
         # log out
         page.click("text=Logout")
+
 
 if __name__ == "__main__":
     delete_existing_user()

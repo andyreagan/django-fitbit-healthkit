@@ -10,21 +10,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
 def check_fitbit_access_profile(fitbitUser: FitbitUser) -> bool:
-    '''
-    This is a good idea BUT need write access to profile do use this endpoint.    
+    """
+    This is a good idea BUT need write access to profile do use this endpoint.
     > Invalid authentication token. The PROFILE (WRITE) scope is required.
-    '''
+    """
     resp, _ = fitbitUser.make_request(
-        'get', 'https://api.fitbit.com/1/user/-/profile.json'
+        "get", "https://api.fitbit.com/1/user/-/profile.json"
     )
-    
+
     if resp.status_code != 200:
         return False
-    
+
     # if this succeeded, update their scopes from the profile
-    new_scopes = resp.json()['user']['scope']
+    new_scopes = resp.json()["user"]["scope"]
     # check if they're difference
     if new_scopes != fitbitUser.scopes:
         fitbitUser.scopes = new_scopes
@@ -43,25 +42,29 @@ def check_fitbit_access(fitbitUser: FitbitUser) -> bool:
     return True
 
 
-def daily_activity_summary(fitbitUser: FitbitUser, d: date) -> Tuple[Optional[requests.models.Response], Optional[Exception]]:
+def daily_activity_summary(
+    fitbitUser: FitbitUser, d: date
+) -> Tuple[Optional[requests.models.Response], Optional[Exception]]:
     """
     ref: https://dev.fitbit.com/build/reference/web-api/activity/get-daily-activity-summary/
     format: /1/user/[user-id]/activities/date/[date].json
     """
     return fitbitUser.make_request(
-            "get",
-            f"https://api.fitbit.com/1/user/-/activities/date/{d.isoformat()}.json",
-        )
+        "get",
+        f"https://api.fitbit.com/1/user/-/activities/date/{d.isoformat()}.json",
+    )
 
 
-def sleep_log_by_date(fitbitUser: FitbitUser, d: date) -> Tuple[Optional[requests.models.Response], Optional[Exception]]:
+def sleep_log_by_date(
+    fitbitUser: FitbitUser, d: date
+) -> Tuple[Optional[requests.models.Response], Optional[Exception]]:
     """
     ref: https://dev.fitbit.com/build/reference/web-api/sleep/get-sleep-log-by-date/
     format: /1.2/user/[user-id]/sleep/date/[date].json
     """
     return fitbitUser.make_request(
-            "get", f"https://api.fitbit.com/1.2/user/-/sleep/date/{d.isoformat()}.json"
-        )
+        "get", f"https://api.fitbit.com/1.2/user/-/sleep/date/{d.isoformat()}.json"
+    )
 
 
 def sleep_log_by_date_range(
@@ -78,9 +81,9 @@ def sleep_log_by_date_range(
         logger.info("Date range is too long, won't try to fetch data.")
         return {}
     return fitbitUser.make_request(
-            "get",
-            f"https://api.fitbit.com/1.2/user/-/sleep/date/{start_date.isoformat()}/{end_date.isoformat()}.json",
-        )
+        "get",
+        f"https://api.fitbit.com/1.2/user/-/sleep/date/{start_date.isoformat()}/{end_date.isoformat()}.json",
+    )
 
 
 def activity_intraday_by_date(
@@ -102,9 +105,10 @@ def activity_intraday_by_date(
         return {}
 
     return fitbitUser.make_request(
-            "get",
-            f"https://api.fitbit.com/1/user/-/activities/{activity}/date/{d.isoformat()}/1d/{interval}.json",
-        )
+        "get",
+        f"https://api.fitbit.com/1/user/-/activities/{activity}/date/{d.isoformat()}/1d/{interval}.json",
+    )
+
 
 def activity_timeseries_by_date(
     fitbitUser: FitbitUser, resource: str, d: date, period: str
@@ -145,9 +149,9 @@ def activity_timeseries_by_date(
         logger.info(f"Invalid period {period}, won't try to fetch data.")
         return {}
     return fitbitUser.make_request(
-            "get",
-            f"https://api.fitbit.com/1/user/-/activities/{resource}/date/{d.isoformat()}/{period}.json",
-        )
+        "get",
+        f"https://api.fitbit.com/1/user/-/activities/{resource}/date/{d.isoformat()}/{period}.json",
+    )
 
 
 def activity_timeseries_by_date_range(
@@ -198,6 +202,6 @@ def activity_timeseries_by_date_range(
         logger.info(f"Invalid resource {resource}, won't try to fetch data.")
         return {}
     return fitbitUser.make_request(
-            "get",
-            f"https://api.fitbit.com/1/user/-/activities/{resource}/date/{start_date.isoformat()}/{end_date.isoformat()}.json",
-        )
+        "get",
+        f"https://api.fitbit.com/1/user/-/activities/{resource}/date/{start_date.isoformat()}/{end_date.isoformat()}.json",
+    )

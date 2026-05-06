@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-fitbit-healthkit"
-version = "0.6.2"
+version = "0.6.3"
 description = "A Django app to access Fitbit Web APIs."
 readme = "README.md"
 license = "BSD-3-Clause"
@@ -12,6 +12,7 @@ authors = [
     { name = "Andy Reagan", email = "andy@andyreagan.com" },
 ]
 classifiers = [
+    "Development Status :: 7 - Inactive",
     "Environment :: Web Environment",
     "Framework :: Django",
     "Framework :: Django :: 5.0",
